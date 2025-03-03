@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows XP Tax & Tip Calculator</title>
+    <style>
+        body {
+            font-family: 'Tahoma', sans-serif;
+            background-color: #ECE9D8;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .window {
+            background-color: #ECE9D8;
+            border: 1px solid #0055EA;
+            border-radius: 3px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            width: 480px;
+            overflow: hidden;
+        }
+        
+        .title-bar {
+            background: linear-gradient(to right, #0058E6, #3A93FF);
+            color: white;
+            padding: 5px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+        
+        .window-controls {
+            display: flex;
+        }
+        
+        .window-button {
+            width: 20px;
+            height: 20px;
+            margin-left: 4px;
+            background-color: #D0CFCB;
+            border: 1px solid #888888;
+            border-radius: 2px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .close-button {
+            background-color: #FF5C5C;
+        }
+        
+        .content {
+            padding: 15px;
+        }
+        
+        .display {
+            background-color: white;
+            border: 1px solid #7F9DB9;
+            border-radius: 2px;
+            padding: 10px;
+            margin-bottom: 15px;
+            text-align: right;
+            font-size: 24px;
+            position: relative;
+            height: 40px;
+        }
+        
+        .tax-info {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .calculator-display {
+            background-color: #E7F3FF;
+            border: 1px inset #7F9DB9;
+            padding: 8px;
+            margin-bottom: 10px;
+            text-align: right;
+            font-size: 20px;
+            font-family: 'Consolas', monospace;
+            height: 24px;
+        }
+        
+        .calculator {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .calc-button {
+            background: linear-gradient(to bottom, #F0F0F0, #E1E1E1);
+            border: 1px solid #7F9DB9;
+            border-radius: 3px;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .calc-button:hover {
+            background: linear-gradient(to bottom, #E1E1E1, #D5D5D5);
+        }
+        
+        .calc-button:active {
+            background: #D5D5D5;
+            box-shadow: inset 1px 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        .calc-equals {
+            background: linear-gradient(to bottom, #B5DBFF, #8FC6FF);
+        }
+        
+        .calc-equals:hover {
+            background: linear-gradient(to bottom, #8FC6FF, #67B1FF);
+        }
+        
+        .calc-clear {
+            background: linear-gradient(to bottom, #FFD1D1, #FFAAAA);
+        }
+        
+        .calc-clear:hover {
+            background: linear-gradient(to bottom, #FFAAAA, #FF8888);
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .section {
+            background-color: #F5F4EA;
+            border: 1px solid #ACA899;
+            border-radius: 3px;
+            padding: 10px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #7F9DB9;
+            border-radius: 2px;
+            background-color: white;
+            font-family: 'Tahoma', sans-serif;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .slider {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        
+        .slider-value {
+            width: 40px;
+            text-align: center;
+        }
+        
+        .status-bar {
+            background-color: #ECE9D8;
+            border-top: 1px solid #ACA899;
+            padding: 5px 10px;
+            font-size: 12px;
+            color: #444;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .result-table td {
+            padding: 5px;
+            border-bottom: 1px solid #ACA899;
+        }
+        
+        .result-table td:first-child {
+            font-weight: bold;
+        }
+        
+        .result-table td:last-child {
+            text-align: right;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            border-bottom: 1px dotted #0055EA;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #FFFFDC;
+            color: black;
+            text-align: center;
+            border: 1px solid #7F9DB9;
+            padding: 5px;
+            border-radius: 3px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="window">
+        <div class="title-bar">
+            <div>Tax & Tip Calculator</div>
+            <div class="window-controls">
+                <div class="window-button">_</div>
+                <div class="window-button">□</div>
+                <div class="window-button close-button">✕</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="display">
+                <div class="tax-info" id="tax-info"></div>
+                <div id="display">0.00</div>
+            </div>
+            
+            <div class="section">
+                <label>Calculator</label>
+                <div class="calculator-display" id="calc-display">0</div>
+                <div class="calculator">
+                    <div class="calc-button">7</div>
+                    <div class="calc-button">8</div>
+                    <div class="calc-button">9</div>
+                    <div class="calc-button">/</div>
+                    <div class="calc-button">4</div>
+                    <div class="calc-button">5</div>
+                    <div class="calc-button">6</div>
+                    <div class="calc-button">*</div>
+                    <div class="calc-button">1</div>
+                    <div class="calc-button">2</div>
+                    <div class="calc-button">3</div>
+                    <div class="calc-button">-</div>
+                    <div class="calc-button">0</div>
+                    <div class="calc-button">.</div>
+                    <div class="calc-button calc-equals">=</div>
+                    <div class="calc-button">+</div>
+                    <div class="calc-button calc-clear" style="grid-column: span 2;">C</div>
+                    <div class="calc-button" id="use-amount" style="grid-column: span 2;">Use Amount</div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="section">
+                    <label for="state">State</label>
+                    <select id="state">
+                        <option value="NY">New York</option>
+                        <option value="CA">California</option>
+                        <option value="UT">Utah</option>
+                        <option value="CO">Colorado</option>
+                        <option value="AZ">Arizona</option>
+                    </select>
+                    
+                    <label for="city">City</label>
+                    <select id="city">
+                        <!-- Cities will be populated based on state selection -->
+                    </select>
+                    
+                    <label for="item-type">Purchase Type</label>
+                    <select id="item-type">
+                        <option value="clothing">Clothing</option>
+                        <option value="groceries">Groceries</option>
+                        <option value="restaurant">Restaurant</option>
+                    </select>
+                </div>
+                
+                <div class="section">
+                    <div class="tooltip">
+                        Tip (%)
+                        <span class="tooltiptext">Move the slider to adjust tip percentage</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" id="tip-slider" class="slider" min="0" max="30" value="15">
+                        <span id="tip-value" class="slider-value">15%</span>
+                    </div>
+                    
+                    <table class="result-table">
+                        <tr>
+                            <td>Subtotal:</td>
+                            <td id="subtotal">$0.00</td>
+                        </tr>
+                        <tr>
+                            <td>Tax:</td>
+                            <td id="tax-amount">$0.00</td>
+                        </tr>
+                        <tr>
+                            <td>Tip:</td>
+                            <td id="tip-amount">$0.00</td>
+                        </tr>
+                        <tr>
+                            <td>Total:</td>
+                            <td id="total">$0.00</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <div>Ready</div>
+            <div id="current-date"></div>
+        </div>
+    </div>
+
+    <script>
+        // City tax rates data structure
+        const cityTaxRates = {
+            NY: {
+                "New York City": {
+                    clothing: 4.5,
+                    groceries: 0,
+                    restaurant: 8.875
+                },
+                "Buffalo": {
+                    clothing: 8.75,
+                    groceries: 0,
+                    restaurant: 8.75
+                },
+                "Albany": {
+                    clothing: 8.0,
+                    groceries: 0,
+                    restaurant: 8.0
+                },
+                "Rochester": {
+                    clothing: 8.0,
+                    groceries: 0,
+                    restaurant: 8.0
+                }
+            },
+            CA: {
+                "Los Angeles": {
+                    clothing: 9.5,
+                    groceries: 0,
+                    restaurant: 9.5
+                },
+                "San Francisco": {
+                    clothing: 8.625,
+                    groceries: 0,
+                    restaurant: 8.625
+                },
+                "San Diego": {
+                    clothing: 7.75,
+                    groceries: 0,
+                    restaurant: 7.75
+                },
+                "Sacramento": {
+                    clothing: 8.75,
+                    groceries: 0,
+                    restaurant: 8.75
+                }
+            },
+            UT: {
+                "Salt Lake City": {
+                    clothing: 7.75,
+                    groceries: 3.0,
+                    restaurant: 7.75
+                },
+                "Provo": {
+                    clothing: 7.25,
+                    groceries: 3.0,
+                    restaurant: 7.25
+                },
+                "Park City": {
+                    clothing: 8.7,
+                    groceries: 3.0,
+                    restaurant: 8.7
+                },
+                "Moab": {
+                    clothing: 8.6,
+                    groceries: 3.0,
+                    restaurant: 8.6
+                }
+            },
+            CO: {
+                "Denver": {
+                    clothing: 8.81,
+                    groceries: 0,
+                    restaurant: 8.81
+                },
+                "Boulder": {
+                    clothing: 8.845,
+                    groceries: 0,
+                    restaurant: 8.845
+                },
+                "Colorado Springs": {
+                    clothing: 8.2,
+                    groceries: 0,
+                    restaurant: 8.2
+                },
+                "Aspen": {
+                    clothing: 9.3,
+                    groceries: 0,
+                    restaurant: 9.3
+                }
+            },
+            AZ: {
+                "Phoenix": {
+                    clothing: 8.6,
+                    groceries: 0,
+                    restaurant: 8.6
+                },
+                "Tucson": {
+                    clothing: 8.7,
+                    groceries: 0,
+                    restaurant: 8.7
+                },
+                "Flagstaff": {
+                    clothing: 9.181,
+                    groceries: 0,
+                    restaurant: 9.181
+                },
+                "Sedona": {
+                    clothing: 9.35,
+                    groceries: 0,
+                    restaurant: 9.35
+                }
+            }
+        };
+        
+        // Get DOM elements
+        const stateSelect = document.getElementById('state');
+        const citySelect = document.getElementById('city');
+        const itemTypeSelect = document.getElementById('item-type');
+        const tipSlider = document.getElementById('tip-slider');
+        const tipValue = document.getElementById('tip-value');
+        const displayElement = document.getElementById('display');
+        const taxInfoElement = document.getElementById('tax-info');
+        const subtotalElement = document.getElementById('subtotal');
+        const taxAmountElement = document.getElementById('tax-amount');
+        const tipAmountElement = document.getElementById('tip-amount');
+        const totalElement = document.getElementById('total');
+        const currentDateElement = document.getElementById('current-date');
+        const calcDisplay = document.getElementById('calc-display');
+        const useAmountButton = document.getElementById('use-amount');
+        
+        // Calculator variables
+        let currentInput = '0';
+        let currentOperator = null;
+        let previousInput = null;
+        let calculatorResult = 0;
+        let lastButtonWasOperator = false;
+        
+        // Format currency
+        function formatCurrency(value) {
+            return '$' + value.toFixed(2);
+        }
+        
+        // Populate city dropdown based on selected state
+        function populateCities() {
+            const state = stateSelect.value;
+            citySelect.innerHTML = '';
+            
+            Object.keys(cityTaxRates[state]).forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                citySelect.appendChild(option);
+            });
+            
+            calculate();
+        }
+        
+        // Calculate and update display
+        function calculate() {
+            // Get input values
+            const amount = parseFloat(calcDisplay.textContent) || 0;
+            const state = stateSelect.value;
+            const city = citySelect.value;
+            const itemType = itemTypeSelect.value;
+            const tipPercentage = parseInt(tipSlider.value);
+            
+            // Get tax rate for the current location and item type
+            const taxRate = cityTaxRates[state][city][itemType];
+            
+            // Calculate amounts
+            const taxAmount = (amount * taxRate / 100);
+            const tipAmount = (amount * tipPercentage / 100);
+            const total = amount + taxAmount + tipAmount;
+            
+            // Update tax info
+            taxInfoElement.textContent = `${city}, ${state}: ${taxRate}% (${itemType})`;
+            
+            // Update display
+            displayElement.textContent = formatCurrency(total);
+            
+            // Update table values
+            subtotalElement.textContent = formatCurrency(amount);
+            taxAmountElement.textContent = formatCurrency(taxAmount);
+            tipAmountElement.textContent = formatCurrency(tipAmount);
+            totalElement.textContent = formatCurrency(total);
+        }
+        
+        // Update tip value display
+        function updateTipValue() {
+            tipValue.textContent = tipSlider.value + '%';
+        }
+        
+        // Update calculator display
+        function updateCalcDisplay() {
+            calcDisplay.textContent = currentInput;
+        }
+        
+        // Handle calculator button clicks
+        function handleCalcButtonClick(button) {
+            const buttonText = button.textContent;
+            
+            // Number buttons
+            if (!isNaN(parseInt(buttonText)) || buttonText === '.') {
+                if (buttonText === '.' && currentInput.includes('.')) {
+                    return; // Prevent multiple decimal points
+                }
+                
+                if (currentInput === '0' || lastButtonWasOperator) {
+                    currentInput = buttonText === '.' ? '0.' : buttonText;
+                    lastButtonWasOperator = false;
+                } else {
+                    currentInput += buttonText;
+                }
+                
+                updateCalcDisplay();
+            }
+            // Operators
+            else if (['+', '-', '*', '/'].includes(buttonText)) {
+                if (previousInput !== null) {
+                    calculateResult();
+                }
+                
+                previousInput = parseFloat(currentInput);
+                currentOperator = buttonText;
+                lastButtonWasOperator = true;
+            }
+            // Equals
+            else if (buttonText === '=') {
+                if (previousInput !== null && currentOperator) {
+                    calculateResult();
+                    currentOperator = null;
+                    previousInput = null;
+                    lastButtonWasOperator = true;
+                }
+            }
+            // Clear
+            else if (buttonText === 'C') {
+                currentInput = '0';
+                previousInput = null;
+                currentOperator = null;
+                lastButtonWasOperator = false;
+                updateCalcDisplay();
+            }
+            
+            // After calculation, update the tax/tip calculation
+            calculate();
+        }
+        
+        // Calculate the result of the current operation
+        function calculateResult() {
+            const current = parseFloat(currentInput);
+            
+            switch (currentOperator) {
+                case '+':
+                    calculatorResult = previousInput + current;
+                    break;
+                case '-':
+                    calculatorResult = previousInput - current;
+                    break;
+                case '*':
+                    calculatorResult = previousInput * current;
+                    break;
+                case '/':
+                    calculatorResult = previousInput / current;
+                    break;
+            }
+            
+            currentInput = calculatorResult.toString();
+            updateCalcDisplay();
+        }
+        
+        // Set event listeners
+        stateSelect.addEventListener('change', populateCities);
+        citySelect.addEventListener('change', calculate);
+        itemTypeSelect.addEventListener('change', calculate);
+        tipSlider.addEventListener('input', function() {
+            updateTipValue();
+            calculate();
+        });
+        
+        // Add calculator button event listeners
+        document.querySelectorAll('.calc-button').forEach(button => {
+            if (button.id !== 'use-amount') {
+                button.addEventListener('click', () => handleCalcButtonClick(button));
+            }
+        });
+        
+        // Use amount button
+        useAmountButton.addEventListener('click', () => {
+            calculate();
+        });
+        
+        // Update date in status bar
+        function updateDate() {
+            const now = new Date();
+            const options = { hour: '2-digit', minute: '2-digit' };
+            currentDateElement.textContent = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], options);
+        }
+        
+        // Initialize
+        populateCities();
+        updateTipValue();
+        updateCalcDisplay();
+        calculate();
+        updateDate();
+        setInterval(updateDate, 60000); // Update time every minute
+    </script>
+</body>
+</html>
